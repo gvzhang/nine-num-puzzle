@@ -1,10 +1,19 @@
 <?php
-    require("puzzle.php");
+    set_time_limit(0);
+
+    require("lib/puzzle.php");
     $horizontal = 3;
     $vertical = 3;
     $puzzle = new Puzzle($horizontal, $vertical);
-    $puzzleArr = $puzzle->getPuzzleArr();
-    $availableWarning = $puzzle->isAvailable()?"":"无解八数组";
+    $puzzleArr = $puzzle->getPuzzle();
+    $solutionPath = [];
+    $availableWarning = "无解八数组";
+    if($puzzle->hasSolution()){
+        $availableWarning = "";
+        $solutionPath = $puzzle->computeSolution();
+    }
+    echo $availableWarning."<br />";
+    var_dump($solutionPath);exit;
     $puzzleArr = json_encode($puzzleArr);
 ?>
 <html>
