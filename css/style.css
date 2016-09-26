@@ -1,39 +1,19 @@
-.main_content ul {
-    list-style: none;
+.clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
 }
 
-.main_content ul li {
-    width: 200px;
-    height: 120px;
-    float: left;
-    margin: 10px
-}
-
-.main_content {
-    background: #eee;
-    width: 740px;
-    height: 460px;
-    margin: 100px auto;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.main_content .item {
-    width: 200px;
-    height: 120px;
-    line-height: 120px;
+.spend_timer {
+    position: absolute;
+    top: 0;
+    left: 0;
     text-align: center;
-    cursor: pointer;
-    background: #ccc;
+    font-size: 26px;
+    width: 100%;
 }
-
-.main_content .item img {
-    width: 200px;
-    height: 120px;
-    border-radius: 6px;
-}
-
-.spend_time {
-    text-align: center;
-    font-size: 40px;
+.spend_timer .warning{
+    color: red;
 }

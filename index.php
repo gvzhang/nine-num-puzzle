@@ -3,40 +3,38 @@
     $horizontal = 3;
     $vertical = 3;
     $puzzle = new Puzzle($horizontal, $vertical);
-    $puzzleArr = json_encode($puzzle->getPuzzleArr());
+    $puzzleArr = $puzzle->getPuzzleArr();
+    $availableWarning = $puzzle->isAvailable()?"":"无解八数组";
+    $puzzleArr = json_encode($puzzleArr);
 ?>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>八数码拼盘</title>
+    <link rel="stylesheet" type="text/css" href="css/puzzle.css"/>
     <link rel="stylesheet" type="text/css" href="css/style.css"/>
     <script type="text/javascript" src="js/jq.js"></script>
     <script type="text/javascript" src="js/utils.js"></script>
     <script type="text/javascript" src="js/puzzle.js"></script>
     <script type="text/javascript">
-        $(function () {
-            //将PHP传来的字符串还原成数组
-            var puzzle_data = JSON.parse('<?=$puzzleArr?>');
-
-            var beginDropFn = function () {
-                console.log("开始拼图");
-            };
-
-            var verifyCallbackFn = function () {
-                alert("拼图成功");
-            };
-
-            $(".main_content").puzzle({
-                data: puzzle_data,
-                horizontal: "<?=$horizontal?>",
-                vertical: "<?=$vertical?>",
-                beginDrop: beginDropFn,
-                verifyCallback: verifyCallbackFn
-            });
-        });
+        //将PHP传来的字符串还原成数组
+        var puzzle_data = JSON.parse('<?=$puzzleArr?>');
+        var horizontal = "<?=$horizontal?>";
+        var vertical = "<?=$vertical?>";
     </script>
+    <script type="text/javascript" src="js/public.js"></script>
 </head>
 <body>
+<div class="spend_timer">
+    <div class="timer_show">
+        耗时：<span class="num" id="timer_show">000:00:0</span>
+    </div>
+    <div class="step_number">
+        步数：<span id="step_number">0</span>
+    </div>
+    <div class="warning" id="warning"><?=$availableWarning?></div>
+    <div class="clearfix"></div>
+</div>
 <div class="main_content"></div>
 </body>
 </html>

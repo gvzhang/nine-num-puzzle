@@ -15,6 +15,9 @@ var drag = {
     beginDrop: function () {
 
     },
+    endSwap: function () {
+
+    },
     bindDrop: function(obj){
         var self = this;
         $(obj).find(".item").each(function (i) {
@@ -78,6 +81,8 @@ var drag = {
                 this.move();
                 $(this).attr("index", this.box.index());
                 $(currentItem).attr("index", currentItem.box.index());
+
+                self.endSwap();
             },
             this.drag = function () { // 拖拽
                 var oldPosition = new self.Position();
