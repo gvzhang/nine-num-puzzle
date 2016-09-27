@@ -34,33 +34,21 @@ class Puzzle
 
     /**
      * 初始拼图数组
-     * @var array
+     * @var string
      */
-    private $_initPuzzle = [];
+    private $_initPuzzle = "";
 
     /**
      * 目标数组
-     * @var array
+     * @var string
      */
-    private $_puzzleTarget = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
-
-    /**
-     * 操作单元格位置
-     * @var array
-     */
-    private $_gridPosition;
+    private $_puzzleTarget = "1234567890";
 
     /**
      * 搜索的队列
      * @var array
      */
     private $_queue = [];
-
-    /**
-     * 搜索的队列KEY值
-     * @var array
-     */
-    private $_queueKeys = [];
 
     /**
      * 获取二维数组形式的组合
@@ -85,18 +73,21 @@ class Puzzle
      */
     public function __construct($horizontal, $vertical)
     {
+        $initPuzzle = [];
         $product = $horizontal * $vertical;
         for ($i = 0; $i < $product; $i++) {
             $randNum = $this->randNumFn($product);
             if ($randNum == $product) {
-                $this->_gridPosition = $i;
-                $this->_initPuzzle[$i] = 0;
+                $initPuzzle[$i] = 0;
             } else {
-                $this->_initPuzzle[$i] = $randNum;
+                $initPuzzle[$i] = $randNum;
             }
         }
-        array_push($this->_queue, $this->_initPuzzle);
-        array_push($_queueKeys, md5($this->_initPuzzle));
+        //组合成逗号字符串形式，方便存储比较
+        foreach ($initPuzzle as $val) {
+            $this->_initPuzzle .= $val . ",";
+        }
+        array_push($this->_queue, rtrim($this->_initPuzzle, ","));
     }
 
     /**
@@ -126,9 +117,10 @@ class Puzzle
     public function hasSolution()
     {
         $totalGreaterNum = 0;
-        foreach ($this->_initPuzzle as $key => $val) {
+        $initPuzzleArr = explode(",", $this->_initPuzzle);
+        foreach ($initPuzzleArr as $key => $val) {
             if ($val) {
-                foreach ($this->_initPuzzle as $key2 => $val2) {
+                foreach ($initPuzzleArr as $key2 => $val2) {
                     if ($key2 < $key) {
                         if ($val2 > $val) {
                             $totalGreaterNum++;
@@ -154,10 +146,8 @@ class Puzzle
                 $queue = reset($this->_queue);
                 foreach ($this->_operations as $operation) {
                     if ($changeQueue = $this->move($queue, $operation)) {
-                        $changeQueueMd5 = md5($changeQueue);
-                        if (!in_array($changeQueueMd5, $this->_queueKeys)) {
-                            array_unshift($this->_queue, $changeQueue);
-                            array_push($this->_queue, $changeQueueMd5);
+                        if (!in_array($changeQueue, $this->_queue)) {
+                            array_push($this->_queue, $changeQueue);
                         }
                         if ($changeQueue === $this->_puzzleTarget) {
                             $isSolve = true;
@@ -181,37 +171,39 @@ class Puzzle
      */
     private function move($queue, $operation)
     {
+        $queue = explode(",", $queue);
         $temp = $queue;
+        $zeroPosition = array_search(0, $queue);
         switch ($operation) {
             case self::OPERATION_UP:
-                if (!in_array($this->_gridPosition, [0, 1, 2])) {
-                    $queue[$this->_gridPosition] = $queue[$this->_gridPosition - 3];
-                    $queue[$this->_gridPosition - 3] = 0;
+                if (!in_array($zeroPosition, [0, 1, 2])) {
+                    $queue[$zeroPosition] = $queue[$zeroPosition - 3];
+                    $queue[$zeroPosition - 3] = 0;
                 }
                 break;
             case self::OPERATION_DOWN:
-                if (!in_array($this->_gridPosition, [6, 7, 8])) {
-                    $queue[$this->_gridPosition] = $queue[$this->_gridPosition + 3];
-                    $queue[$this->_gridPosition + 3] = 0;
+                if (!in_array($zeroPosition, [6, 7, 8])) {
+                    $queue[$zeroPosition] = $queue[$zeroPosition + 3];
+                    $queue[$zeroPosition + 3] = 0;
                 }
                 break;
             case self::OPERATION_LEFT:
-                if (!in_array($this->_gridPosition, [0, 3, 6])) {
-                    $queue[$this->_gridPosition] = $queue[$this->_gridPosition - 1];
-                    $queue[$this->_gridPosition - 1] = 0;
+                if (!in_array($zeroPosition, [0, 3, 6])) {
+                    $queue[$zeroPosition] = $queue[$zeroPosition - 1];
+                    $queue[$zeroPosition - 1] = 0;
                 }
                 break;
             case self::OPERATION_RIGHT:
-                if (!in_array($this->_gridPosition, [2, 5, 8])) {
-                    $queue[$this->_gridPosition] = $queue[$this->_gridPosition + 1];
-                    $queue[$this->_gridPosition + 1] = 0;
+                if (!in_array($zeroPosition, [2, 5, 8])) {
+                    $queue[$zeroPosition] = $queue[$zeroPosition + 1];
+                    $queue[$zeroPosition + 1] = 0;
                 }
                 break;
         }
         if ($temp === $queue) {
             return false;
         } else {
-            return $queue;
+            return implode(",", $queue);
         }
     }
 }
