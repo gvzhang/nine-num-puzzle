@@ -12,8 +12,6 @@
         $availableWarning = "";
         $solutionPath = $puzzle->computeSolution();
     }
-    echo $availableWarning."<br />";
-    var_dump($solutionPath);exit;
     $puzzleArr = json_encode($puzzleArr);
 ?>
 <html>
@@ -41,6 +39,7 @@
     <div class="step_number">
         步数：<span id="step_number">0</span>
     </div>
+    <div class="solution"><?=implode(",", $solutionPath)?></div>
     <div class="warning" id="warning"><?=$availableWarning?></div>
     <div class="clearfix"></div>
 </div>

@@ -1,5 +1,7 @@
 <?php
 
+require "node.php";
+
 /**
  * 8数码拼图
  * Class Puzzle
@@ -33,6 +35,19 @@ class Puzzle
     private $_operations = [self::OPERATION_UP, self::OPERATION_DOWN, self::OPERATION_LEFT, self::OPERATION_RIGHT];
 
     /**
+     * 操作数组说明
+     * @var array
+     */
+    private $_operationText = [self::OPERATION_UP => "上", self::OPERATION_DOWN => "下", self::OPERATION_LEFT => "左", self::OPERATION_RIGHT => "右"];
+
+    /**
+     * 各对立操作,循环筛选使用
+     * @var array
+     */
+    private $_reverseOperation = [self::OPERATION_UP => self::OPERATION_DOWN, self::OPERATION_DOWN => self::OPERATION_UP,
+        self::OPERATION_LEFT => self::OPERATION_RIGHT, self::OPERATION_RIGHT => self::OPERATION_LEFT];
+
+    /**
      * 初始拼图数组
      * @var string
      */
@@ -42,7 +57,7 @@ class Puzzle
      * 目标数组
      * @var string
      */
-    private $_puzzleTarget = "1234567890";
+    private $_puzzleTarget = "1,2,3,4,5,6,7,8,0";
 
     /**
      * 搜索的队列
@@ -51,18 +66,26 @@ class Puzzle
     private $_queue = [];
 
     /**
+     * 已经搜索的数组集合
+     * @var array
+     */
+    private $_searched = [];
+
+    /**
      * 获取二维数组形式的组合
      * @return array
      */
     public function getPuzzle()
     {
         $outPuzzle = [];
+        $initPuzzle = explode(",", $this->_initPuzzle);
         for ($i = 0; $i < 3; $i++) {
             for ($j = 0; $j < 3; $j++) {
-                $outPuzzle[$i][$j] = $this->_initPuzzle[$i * 3 + $j];
+                $value = $initPuzzle[$i * 3 + $j];
+                $outPuzzle[$i][$j] = $value == 0 ? "" : $value;
             }
         }
-        return $this->_initPuzzle;
+        return $outPuzzle;
     }
 
     /**
@@ -87,7 +110,8 @@ class Puzzle
         foreach ($initPuzzle as $val) {
             $this->_initPuzzle .= $val . ",";
         }
-        array_push($this->_queue, rtrim($this->_initPuzzle, ","));
+        $this->_initPuzzle = rtrim($this->_initPuzzle, ",");
+        array_push($this->_queue, new Node($this->_initPuzzle, 0, ""));
     }
 
     /**
@@ -141,23 +165,32 @@ class Puzzle
     public function computeSolution()
     {
         if ($this->hasSolution()) {
-            $isSolve = false;
-            while (count($this->_queue) > 0 && !$isSolve) {
-                $queue = reset($this->_queue);
-                foreach ($this->_operations as $operation) {
-                    if ($changeQueue = $this->move($queue, $operation)) {
-                        if (!in_array($changeQueue, $this->_queue)) {
-                            array_push($this->_queue, $changeQueue);
-                        }
-                        if ($changeQueue === $this->_puzzleTarget) {
-                            $isSolve = true;
-                            break;
+            if ($this->_initPuzzle !== $this->_puzzleTarget) {
+                $this->_searched[$this->_initPuzzle] = reset($this->_queue);
+                $isSolve = false;
+                while (count($this->_queue) > 0 && !$isSolve) {
+                    $queue = reset($this->_queue);
+                    foreach ($this->_operations as $operation) {
+                        if ($this->_reverseOperation[$operation] !== $queue->getOperation()) {
+                            if ($changeQueueKey = $this->move($queue->getKey(), $operation)) {
+                                if (!isset($this->_searched[$changeQueueKey])) {
+                                    //未搜索过,压入队列
+                                    $node = new Node($changeQueueKey, $queue->getKey(), $operation);
+                                    array_push($this->_queue, $node);
+                                    $this->_searched[$changeQueueKey] = $node;
+                                }
+                                if ($changeQueueKey === $this->_puzzleTarget) {
+                                    $isSolve = true;
+                                    break;
+                                }
+                            }
                         }
                     }
+                    //搜索完毕,出队列
+                    array_shift($this->_queue);
                 }
-                array_shift($this->_queue);
             }
-            return $changeQueue;
+            return $this->getPath($this->_puzzleTarget);
         } else {
             return [];
         }
@@ -204,6 +237,23 @@ class Puzzle
             return false;
         } else {
             return implode(",", $queue);
+        }
+    }
+
+    /**
+     * 还原路径
+     * @param $nodeKey
+     * @return array
+     */
+    private function getPath($nodeKey)
+    {
+        static $path = [];
+        $node = $this->_searched[$nodeKey];
+        if ($node->getParentNode() == 0) {
+            return array_reverse($path);
+        } else {
+            array_push($path, $this->_operationText[$node->getOperation()]);
+            return $this->getPath($node->getParentNode());
         }
     }
 }
