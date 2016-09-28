@@ -156,6 +156,7 @@ var drag = {
                 data: [],
                 solutionPath: [],
                 isAuto: false,
+                autoDelay: 0,
                 verifyCallback: function () {
                     alert("拼图成功");
                 }
@@ -210,7 +211,7 @@ var drag = {
             drag.bindDrop(self);
 
             //自动完成拼图配置
-            if (params.isAuto && params.solutionPath) {
+            if (params.isAuto && params.solutionPath.length > 0) {
                 var auto = {
                     queue: [],
                     up: function () {
@@ -281,8 +282,12 @@ var drag = {
                             break;
                     }
                 }
-                params.begin();
-                auto.move();
+
+                var beginMove = function () {
+                    params.begin();
+                    auto.move();
+                };
+                setTimeout(beginMove, params.autoDelay);
             }
         });
     };

@@ -33,7 +33,7 @@ $(function () {
 
     var verifyCallbackFn = function () {
         isComplete = true;
-        alert("八数组排序成功");
+        setTimeout("alert('八数码排序成功')", 1500);
         clearInterval(refreshInterval);
     };
 
@@ -46,6 +46,7 @@ $(function () {
         endSwap: endSwapFn,
         verifyCallback: verifyCallbackFn,
         solutionPath: solutionPath,
-        isAuto: true
+        isAuto: true,
+        autoDelay: 2000
     });
 });

@@ -6,12 +6,15 @@
     $vertical = 3;
     $puzzle = new Puzzle($horizontal, $vertical);
     $puzzleArr = $puzzle->getPuzzle();
-    $solutionPath = [];
-    $solutionPathText = [];
-    $availableWarning = "无解八数组";
+    $timeBegin = 0;$timeEnd = 0;
+    $solutionPath = [];$solutionPathText = [];
+    $availableWarning = "无解八数码";
     if ($puzzle->hasSolution()) {
         $availableWarning = "";
+
+        $timeBegin = microtime(true);
         $solutionPath = $puzzle->computeSolution();
+        $timeEnd = microtime(true);
 
         $formatTest = function ($record) {
             return Puzzle::OPERATION_TEXT[$record];
@@ -41,14 +44,19 @@
 </head>
 <body>
 <div class="spend_timer">
-    <div class="timer_show">
-        耗时：<span class="num" id="timer_show">000:00:0</span>
-    </div>
     <div class="step_number">
+        拼图计时：<span class="num" id="timer_show">000:00:0</span>&nbsp;&nbsp;
         步数：<span id="step_number">0</span>
     </div>
-    <div class="solution"><?= implode(",", $solutionPathText) ?></div>
-    <div class="warning" id="warning"><?= $availableWarning ?></div>
+    <?php if (count($solutionPathText) > 0) { ?>
+        <div class="timer_show">
+            使用了<?= round($timeEnd - $timeBegin, 3) ?>秒生成解决路径
+        </div>
+        <div class="solution"><?= implode(",", $solutionPathText) ?></div>
+    <?php } ?>
+    <?php if (!empty($availableWarning)) { ?>
+        <div class="warning" id="warning"><?= $availableWarning ?></div>
+    <?php } ?>
     <div class="clearfix"></div>
 </div>
 <div class="main_content"></div>

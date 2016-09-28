@@ -38,7 +38,7 @@ class Puzzle
      * 操作数组说明
      * @var array
      */
-    const OPERATION_TEXT = [self::OPERATION_UP => "上", self::OPERATION_DOWN => "下", self::OPERATION_LEFT => "左", self::OPERATION_RIGHT => "右"];
+    const OPERATION_TEXT = [self::OPERATION_UP => "↑", self::OPERATION_DOWN => "↓", self::OPERATION_LEFT => "←", self::OPERATION_RIGHT => "→"];
 
     /**
      * 各对立操作,循环筛选使用

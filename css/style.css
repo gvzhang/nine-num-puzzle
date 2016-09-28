@@ -11,7 +11,8 @@
     top: 0;
     left: 0;
     text-align: center;
-    font-size: 26px;
+    font-size: 24px;
+    line-height: 30px;
     width: 100%;
 }
 .spend_timer .warning{
