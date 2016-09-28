@@ -39,11 +39,13 @@ $(function () {
 
     //初始化拼图
     $(".main_content").puzzle({
-        data: puzzle_data,
+        data: puzzleData,
         horizontal: horizontal,
         vertical: vertical,
-        beginDrop: beginDropFn,
+        begin: beginDropFn,
         endSwap: endSwapFn,
-        verifyCallback: verifyCallbackFn
+        verifyCallback: verifyCallbackFn,
+        solutionPath: solutionPath,
+        isAuto: true
     });
 });

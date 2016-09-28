@@ -38,7 +38,7 @@ class Puzzle
      * 操作数组说明
      * @var array
      */
-    private $_operationText = [self::OPERATION_UP => "上", self::OPERATION_DOWN => "下", self::OPERATION_LEFT => "左", self::OPERATION_RIGHT => "右"];
+    const OPERATION_TEXT = [self::OPERATION_UP => "上", self::OPERATION_DOWN => "下", self::OPERATION_LEFT => "左", self::OPERATION_RIGHT => "右"];
 
     /**
      * 各对立操作,循环筛选使用
@@ -106,6 +106,7 @@ class Puzzle
                 $initPuzzle[$i] = $randNum;
             }
         }
+
         //组合成逗号字符串形式，方便存储比较
         foreach ($initPuzzle as $val) {
             $this->_initPuzzle .= $val . ",";
@@ -249,10 +250,10 @@ class Puzzle
     {
         static $path = [];
         $node = $this->_searched[$nodeKey];
-        if ($node->getParentNode() == 0) {
+        if ($node->getParentNode() === 0) {
             return array_reverse($path);
         } else {
-            array_push($path, $this->_operationText[$node->getOperation()]);
+            array_push($path, $node->getOperation());
             return $this->getPath($node->getParentNode());
         }
     }

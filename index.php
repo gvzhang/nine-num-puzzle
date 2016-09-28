@@ -7,12 +7,19 @@
     $puzzle = new Puzzle($horizontal, $vertical);
     $puzzleArr = $puzzle->getPuzzle();
     $solutionPath = [];
+    $solutionPathText = [];
     $availableWarning = "无解八数组";
-    if($puzzle->hasSolution()){
+    if ($puzzle->hasSolution()) {
         $availableWarning = "";
         $solutionPath = $puzzle->computeSolution();
+
+        $formatTest = function ($record) {
+            return Puzzle::OPERATION_TEXT[$record];
+        };
+        $solutionPathText = array_map($formatTest, $solutionPath);
     }
     $puzzleArr = json_encode($puzzleArr);
+    $solutionPath = json_encode($solutionPath);
 ?>
 <html>
 <head>
@@ -25,9 +32,10 @@
     <script type="text/javascript" src="js/puzzle.js"></script>
     <script type="text/javascript">
         //将PHP传来的字符串还原成数组
-        var puzzle_data = JSON.parse('<?=$puzzleArr?>');
+        var puzzleData = JSON.parse('<?=$puzzleArr?>');
         var horizontal = "<?=$horizontal?>";
         var vertical = "<?=$vertical?>";
+        var solutionPath = JSON.parse("<?=$solutionPath?>");
     </script>
     <script type="text/javascript" src="js/public.js"></script>
 </head>
@@ -39,8 +47,8 @@
     <div class="step_number">
         步数：<span id="step_number">0</span>
     </div>
-    <div class="solution"><?=implode(",", $solutionPath)?></div>
-    <div class="warning" id="warning"><?=$availableWarning?></div>
+    <div class="solution"><?= implode(",", $solutionPathText) ?></div>
+    <div class="warning" id="warning"><?= $availableWarning ?></div>
     <div class="clearfix"></div>
 </div>
 <div class="main_content"></div>
