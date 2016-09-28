@@ -19,7 +19,7 @@ if ($puzzle->hasSolution()) {
     $timeEnd = microtime(true);
 
     $formatTest = function ($record) {
-        return Puzzle::OPERATION_TEXT[$record];
+        return Puzzle::$operationText[$record];
     };
     $solutionPathText = array_map($formatTest, $solutionPath);
 }
