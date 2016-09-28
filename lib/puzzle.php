@@ -179,10 +179,11 @@ class Puzzle
                                     $node = new Node($changeQueueKey, $queue->getKey(), $operation);
                                     array_push($this->_queue, $node);
                                     $this->_searched[$changeQueueKey] = $node;
-                                }
-                                if ($changeQueueKey === $this->_puzzleTarget) {
-                                    $isSolve = true;
-                                    break;
+                                }else {
+                                    if ($changeQueueKey === $this->_puzzleTarget) {
+                                        $isSolve = true;
+                                        break;
+                                    }
                                 }
                             }
                         }
