@@ -1,28 +1,30 @@
 <?php
-    set_time_limit(0);
+set_time_limit(0);
 
-    require("lib/puzzle.php");
-    $horizontal = 3;
-    $vertical = 3;
-    $puzzle = new Puzzle($horizontal, $vertical);
-    $puzzleArr = $puzzle->getPuzzle();
-    $timeBegin = 0;$timeEnd = 0;
-    $solutionPath = [];$solutionPathText = [];
-    $availableWarning = "无解八数码";
-    if ($puzzle->hasSolution()) {
-        $availableWarning = "";
+require("lib/puzzle.php");
+$horizontal = 3;
+$vertical = 3;
+$puzzle = new Puzzle($horizontal, $vertical);
+$puzzleArr = $puzzle->getPuzzle();
+$timeBegin = 0;
+$timeEnd = 0;
+$solutionPath = [];
+$solutionPathText = [];
+$availableWarning = "无解八数码";
+if ($puzzle->hasSolution()) {
+    $availableWarning = "";
 
-        $timeBegin = microtime(true);
-        $solutionPath = $puzzle->computeSolution();
-        $timeEnd = microtime(true);
+    $timeBegin = microtime(true);
+    $solutionPath = $puzzle->computeSolution();
+    $timeEnd = microtime(true);
 
-        $formatTest = function ($record) {
-            return Puzzle::OPERATION_TEXT[$record];
-        };
-        $solutionPathText = array_map($formatTest, $solutionPath);
-    }
-    $puzzleArr = json_encode($puzzleArr);
-    $solutionPath = json_encode($solutionPath);
+    $formatTest = function ($record) {
+        return Puzzle::OPERATION_TEXT[$record];
+    };
+    $solutionPathText = array_map($formatTest, $solutionPath);
+}
+$puzzleArr = json_encode($puzzleArr);
+$solutionPath = json_encode($solutionPath);
 ?>
 <html>
 <head>
@@ -39,6 +41,7 @@
         var horizontal = "<?=$horizontal?>";
         var vertical = "<?=$vertical?>";
         var solutionPath = JSON.parse("<?=$solutionPath?>");
+        var isAuto = "<?=isset($_GET["auto"]) ? $_GET["auto"] : ""?>";
     </script>
     <script type="text/javascript" src="js/public.js"></script>
 </head>

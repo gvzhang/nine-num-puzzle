@@ -16,7 +16,7 @@ $(function () {
 
     //将PHP传来的字符串还原成数组
     var beginDropFn = function () {
-        if(isComplete === false) {
+        if (isComplete === false) {
             if (timeBegin == null) {
                 timeBegin = new Date().getTime();
             }
@@ -26,7 +26,7 @@ $(function () {
 
     //交换位置结束后
     var endSwapFn = function () {
-        if(isComplete === false) {
+        if (isComplete === false) {
             $("#step_number").text(++totalStepNum);
         }
     };
@@ -46,7 +46,7 @@ $(function () {
         endSwap: endSwapFn,
         verifyCallback: verifyCallbackFn,
         solutionPath: solutionPath,
-        isAuto: true,
+        isAuto: isAuto == 1,
         autoDelay: 2000
     });
 });

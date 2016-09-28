@@ -1,5 +1,3 @@
-var operationBox = null;
-
 var drag = {
     horizontal: 3,
     vertical: 3,
@@ -23,22 +21,21 @@ var drag = {
     bindDrop: function (obj) {
         var self = this;
         $(obj).find(".item").each(function (i) {
-            this.init = function () {
-                // 初始化
-                this.box = $(this).parent();
-                $(this).attr("index", i).css({
-                    position: "absolute",
-                    left: this.box.offset().left,
-                    top: this.box.offset().top
-                }).appendTo(obj);
+                this.init = function () {
+                    // 初始化
+                    this.box = $(this).parent();
+                    $(this).attr("index", i).css({
+                        position: "absolute",
+                        left: this.box.offset().left,
+                        top: this.box.offset().top
+                    }).appendTo(obj);
 
-                //操作单元格才允许绑定拖动事件
-                var data_correct = $(this).attr("data-correct");
-                if (data_correct == "") {
-                    operationBox = this;
-                    this.drag();
-                }
-            },
+                    //操作单元格才允许绑定拖动事件
+                    var data_correct = $(this).attr("data-correct");
+                    if (data_correct == "") {
+                        this.drag();
+                    }
+                },
                 this.move = function (callback) {  // 移动
                     $(this).stop(true).animate({
                         left: this.box.offset().left,
@@ -212,6 +209,13 @@ var drag = {
 
             //自动完成拼图配置
             if (params.isAuto && params.solutionPath.length > 0) {
+                var operationBox = null;
+                $(self).find(".item").each(function () {
+                    var data_correct = $(this).attr("data-correct");
+                    if (data_correct == "") {
+                        operationBox = this;
+                    }
+                });
                 var auto = {
                     queue: [],
                     up: function () {
