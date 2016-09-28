@@ -53,9 +53,9 @@ $solutionPath = json_encode($solutionPath);
     </div>
     <?php if (count($solutionPathText) > 0) { ?>
         <div class="timer_show">
-            使用了<?= round($timeEnd - $timeBegin, 3) ?>秒生成解决路径
+            使用了<?= round($timeEnd - $timeBegin, 3) ?>秒生成<a href="javascript:$('#solution').show();">解决路径</a>
         </div>
-        <div class="solution"><?= implode(",", $solutionPathText) ?></div>
+        <div class="solution" id="solution"><?= implode(",", $solutionPathText) ?></div>
     <?php } ?>
     <?php if (!empty($availableWarning)) { ?>
         <div class="warning" id="warning"><?= $availableWarning ?></div>

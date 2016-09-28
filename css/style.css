@@ -18,3 +18,9 @@
 .spend_timer .warning{
     color: red;
 }
+.spend_timer .solution{
+    display: none;
+}
+.spend_timer .timer_show a{
+    text-decoration: none;
+}
