@@ -10,11 +10,11 @@
 }
 
 .main_content {
-    background: #eee;
+    background: #BBADA0;
     width: 740px;
     height: 460px;
     margin: 100px auto;
-    border: 1px solid #ccc;
+    border: 1px solid #959595;
     border-radius: 5px;
 }
 
@@ -24,7 +24,10 @@
     line-height: 120px;
     text-align: center;
     cursor: pointer;
-    background: #ccc;
+    background: #E5D8CB;
+    border-radius: 5px;
+    font-size: 26px;
+    font-weight: bold;
 }
 
 .main_content .item img {
