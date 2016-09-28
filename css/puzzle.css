@@ -28,6 +28,7 @@
     border-radius: 5px;
     font-size: 26px;
     font-weight: bold;
+    border: 1px solid #bbada0;
 }
 
 .main_content .item img {
