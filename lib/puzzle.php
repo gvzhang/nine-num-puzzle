@@ -60,16 +60,28 @@ class Puzzle
     private $_puzzleTarget = "1,2,3,4,5,6,7,8,0";
 
     /**
-     * 搜索的队列
+     * 搜索的队列(头部开始搜索)
      * @var array
      */
     private $_queue = [];
 
     /**
-     * 已经搜索的数组集合
+     * 已经搜索的数组集合(头部开始搜索)
      * @var array
      */
     private $_searched = [];
+
+    /**
+     * 搜索的队列(尾部开始搜索)
+     * @var array
+     */
+    private $_queueEnd = [];
+
+    /**
+     * 已经搜索的数组集合(尾部开始搜索)
+     * @var array
+     */
+    private $_searchedEnd = [];
 
     /**
      * 获取二维数组形式的组合
@@ -113,6 +125,7 @@ class Puzzle
         }
         $this->_initPuzzle = rtrim($this->_initPuzzle, ",");
         array_push($this->_queue, new Node($this->_initPuzzle, 0, ""));
+        array_push($this->_queueEnd, new Node($this->_puzzleTarget, 0, ""));
     }
 
     /**
@@ -165,34 +178,61 @@ class Puzzle
      */
     public function computeSolution()
     {
-        if ($this->hasSolution()) {
-            if ($this->_initPuzzle !== $this->_puzzleTarget) {
-                $this->_searched[$this->_initPuzzle] = reset($this->_queue);
-                $isSolve = false;
-                while (count($this->_queue) > 0 && !$isSolve) {
-                    $queue = reset($this->_queue);
-                    foreach ($this->_operations as $operation) {
-                        if ($this->_reverseOperation[$operation] !== $queue->getOperation()) {
-                            if ($changeQueueKey = $this->move($queue->getKey(), $operation)) {
-                                if (!isset($this->_searched[$changeQueueKey])) {
-                                    //未搜索过,压入队列
-                                    $node = new Node($changeQueueKey, $queue->getKey(), $operation);
-                                    array_push($this->_queue, $node);
-                                    $this->_searched[$changeQueueKey] = $node;
-                                }else {
-                                    if ($changeQueueKey === $this->_puzzleTarget) {
+        if ($this->hasSolution() && $this->_initPuzzle !== $this->_puzzleTarget) {
+            $linkQueue = [];$linkQueueEnd = [];
+            $this->_searched[$this->_initPuzzle] = reset($this->_queue);
+            $this->_searchedEnd[$this->_puzzleTarget] = reset($this->_queueEnd);
+            $isSolve = false;
+
+            //DBFS双向宽搜算法
+            while (count($this->_queue) > 0 && !$isSolve) {
+                $queue = reset($this->_queue);
+                $queueEnd = reset($this->_queueEnd);
+                foreach ($this->_operations as $operation) {
+                    //正向扩展
+                    $queuePush = [];
+                    if ($this->_reverseOperation[$operation] !== $queue->getOperation()) {
+                        if ($changeQueueKey = $this->move($queue->getKey(), $operation)) {
+                            if (!isset($this->_searched[$changeQueueKey])) {
+                                //未搜索过,压入队列
+                                $node = new Node($changeQueueKey, $queue->getKey(), $operation);
+                                array_push($this->_queue, $node);
+                                array_push($queuePush, $node);
+                                $this->_searched[$changeQueueKey] = $node;
+                            }
+                        }
+                    }
+
+                    //逆向扩展
+                    if ($this->_reverseOperation[$operation] !== $queueEnd->getOperation()) {
+                        if ($changeQueueKeyEnd = $this->move($queueEnd->getKey(), $operation)) {
+                            if (!isset($this->_searchedEnd[$changeQueueKeyEnd])) {
+                                //对比正向扩展节点是否相等
+                                foreach ($queuePush as $qNode){
+                                    if($qNode->getKey() === $changeQueueKeyEnd){
                                         $isSolve = true;
+                                        $linkQueue = $changeQueueKeyEnd;
+                                        $linkQueueEnd = $queueEnd->getKey();
                                         break;
                                     }
+                                }
+
+                                if($isSolve == false) {
+                                    //未搜索过,压入队列
+                                    $nodeEnd = new Node($changeQueueKeyEnd, $queueEnd->getKey(), $operation);
+                                    array_push($this->_queueEnd, $nodeEnd);
+                                    $this->_searchedEnd[$changeQueueKeyEnd] = $nodeEnd;
                                 }
                             }
                         }
                     }
-                    //搜索完毕,出队列
-                    array_shift($this->_queue);
                 }
+
+                //搜索完毕,出队列
+                array_shift($this->_queue);
+                array_shift($this->_queueEnd);
             }
-            return $this->getPath($this->_puzzleTarget);
+            return array_merge($this->getPath($linkQueue), $this->getPathEnd($linkQueueEnd));
         } else {
             return [];
         }
@@ -256,6 +296,22 @@ class Puzzle
         } else {
             array_push($path, $node->getOperation());
             return $this->getPath($node->getParentNode());
+        }
+    }
+
+    /**
+     * 还原路径(尾部开始搜索)
+     * @param $nodeKey
+     * @return array
+     */
+    private function getPathEnd($nodeKey){
+        static $path = [];
+        $node = $this->_searchedEnd[$nodeKey];
+        if ($node->getParentNode() === 0) {
+            return $path;
+        } else {
+            array_push($path, $node->getOperation());
+            return $this->getPathEnd($node->getParentNode());
         }
     }
 }
