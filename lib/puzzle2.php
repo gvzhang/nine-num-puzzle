@@ -29,16 +29,6 @@ class Puzzle
     const OPERATION_RIGHT = 3;
 
     /**
-     * 正向扩展
-     */
-    const FORWARD_DIRECTION = 0;
-
-    /**
-     * 反向扩展
-     */
-    const REVERSE_DIRECTION = 1;
-
-    /**
      * 操作数组
      * @var array
      */
@@ -70,16 +60,28 @@ class Puzzle
     private $_puzzleTarget = "1,2,3,4,5,6,7,8,0";
 
     /**
-     * 搜索的队列
+     * 搜索的队列(头部开始搜索)
      * @var array
      */
     private $_queue = [];
 
     /**
-     * 已经搜索的数组集合
+     * 已经搜索的数组集合(头部开始搜索)
      * @var array
      */
     private $_searched = [];
+
+    /**
+     * 搜索的队列(尾部开始搜索)
+     * @var array
+     */
+    private $_queueEnd = [];
+
+    /**
+     * 已经搜索的数组集合(尾部开始搜索)
+     * @var array
+     */
+    private $_searchedEnd = [];
 
     /**
      * 获取二维数组形式的组合
@@ -116,23 +118,15 @@ class Puzzle
 //                $initPuzzle[$i] = $randNum;
 //            }
 //        }
-
         $initPuzzle = [8,6,7,0,3,5,2,4,1];
-//        $initPuzzle = [1,2,3,4,0,5,7,8,6];
-//        $initPuzzle = [1,2,3,0,4,5,6,7,8];
         //组合成逗号字符串形式，方便存储比较
         foreach ($initPuzzle as $val) {
             $this->_initPuzzle .= $val . ",";
         }
-        $this->_initPuzzle = rtrim($this->_initPuzzle, ",");
 
-        //初始扩展状态
-        $initPuzzleNode = new Node($this->_initPuzzle, 0, "");
-        $targetPuzzleNode = new Node($this->_puzzleTarget, 0, "");
-        $this->_queue[self::FORWARD_DIRECTION][] = $initPuzzleNode;
-        $this->_queue[self::REVERSE_DIRECTION][] = $targetPuzzleNode;
-        $this->_searched[self::FORWARD_DIRECTION][$this->_initPuzzle] = $initPuzzleNode;
-        $this->_searched[self::REVERSE_DIRECTION][$this->_puzzleTarget] = $targetPuzzleNode;
+        $this->_initPuzzle = rtrim($this->_initPuzzle, ",");
+        $this->_queue = [new Node($this->_initPuzzle, 0, "")];
+        $this->_queueEnd = [new Node($this->_puzzleTarget, 0, "")];
     }
 
     /**
@@ -180,77 +174,68 @@ class Puzzle
     }
 
     /**
-     * 使用广度优先算法计算解决路径（DBFS双向宽搜算法）
-     * 下一层选择结点个数较少的那个方向先扩展
+     * 使用广度优先算法计算解决路径
      * @return array
      */
     public function computeSolution()
     {
         if ($this->hasSolution() && $this->_initPuzzle !== $this->_puzzleTarget) {
-            $linkQueue = null;
+            $linkQueue = [];
+            $this->_searched[$this->_initPuzzle] = $this->_queue[0];
+            $this->_searchedEnd[$this->_puzzleTarget] = $this->_queueEnd[0];
             $isSolve = false;
+
+            //DBFS双向宽搜算法
             while (!$isSolve) {
-                if (count($this->_queue[self::FORWARD_DIRECTION]) > count($this->_queue[self::REVERSE_DIRECTION])) {
-                    $firstExpand = self::REVERSE_DIRECTION;
-                    $secondExpand = self::FORWARD_DIRECTION;
-                } else {
-                    $firstExpand = self::FORWARD_DIRECTION;
-                    $secondExpand = self::REVERSE_DIRECTION;
+                //正向扩展
+                $levelQueue = $this->_queue;
+                foreach ($levelQueue as $queue) {
+                    foreach ($this->_operations as $operation) {
+                        if ($this->_reverseOperation[$operation] !== $queue->getOperation()) {
+                            if ($changeQueueKey = $this->move($queue->getKey(), $operation)) {
+                                if (!isset($this->_searched[$changeQueueKey])) {
+                                    //未搜索过,压入队列
+                                    $node = new Node($changeQueueKey, $queue->getKey(), $operation);
+                                    array_push($this->_queue, $node);
+                                    $this->_searched[$changeQueueKey] = $node;
+                                }
+                            }
+                        }
+                    }
                 }
-                $this->expand($firstExpand);
-                $this->expand($secondExpand);
-                if($linkQueue = $this->checkMeet()){
-                    $isSolve = true;
+
+                //逆向扩展
+                $levelQueueEnd = $this->_queueEnd;
+                foreach ($levelQueueEnd as $queueEnd) {
+                    foreach ($this->_operations as $operation) {
+                        if ($this->_reverseOperation[$operation] !== $queueEnd->getOperation()) {
+                            if ($changeQueueKeyEnd = $this->move($queueEnd->getKey(), $operation)) {
+                                if (!isset($this->_searchedEnd[$changeQueueKeyEnd])) {
+                                    //未搜索过,压入队列
+                                    $nodeEnd = new Node($changeQueueKeyEnd, $queueEnd->getKey(), $operation);
+                                    array_push($this->_queueEnd, $nodeEnd);
+                                    $this->_searchedEnd[$changeQueueKeyEnd] = $nodeEnd;
+                                }
+
+                                //对比正向扩展节点是否存在相等的
+                                foreach ($this->_queue as $qNode) {
+                                    if ($qNode->getKey() === $changeQueueKeyEnd) {
+                                        $isSolve = true;
+                                        $linkQueue = $changeQueueKeyEnd;
+                                        break;
+                                    }
+                                }
+                                if ($isSolve) break;
+                            }
+                        }
+                    }
+                    if ($isSolve) break;
                 }
             }
             return array_merge($this->getPath($linkQueue), $this->getPathEnd($linkQueue));
         } else {
             return [];
         }
-    }
-
-    /**
-     * 扩展正向（逆向）结点
-     * @param $direction
-     */
-    private function expand($direction)
-    {
-        $levelQueue = [];
-        foreach ($this->_queue[$direction] as $queue) {
-            foreach ($this->_operations as $operation) {
-                if ($this->_reverseOperation[$operation] !== $queue->getOperation()) {
-                    if ($changeQueueKey = $this->move($queue->getKey(), $operation)) {
-                        if (!isset($this->_searched[$direction][$changeQueueKey])) {
-                            //未搜索过,压入队列
-                            $node = new Node($changeQueueKey, $queue->getKey(), $operation);
-                            array_push($levelQueue, $node);
-                            $this->_searched[$direction][$changeQueueKey] = $node;
-                        }
-                    }
-                }
-            }
-        }
-        $this->_queue[$direction] = $levelQueue;
-    }
-
-    /**
-     * 对比扩展节点是否存在相等的
-     */
-    private function checkMeet(){
-        $linkQueue = false;
-        $directions = [self::FORWARD_DIRECTION=>self::REVERSE_DIRECTION, self::REVERSE_DIRECTION=>self::FORWARD_DIRECTION];
-        foreach ($directions as $key=>$value) {
-            foreach ($this->_queue[$value] as $forwardNode) {
-                foreach ($this->_searched[$key] as $reverseNode) {
-                    if ($forwardNode->getKey() === $reverseNode->getKey()) {
-                        $linkQueue = $reverseNode->getKey();
-                        break;
-                    }
-                }
-                if ($linkQueue) break;
-            }
-        }
-        return $linkQueue;
     }
 
     /**
@@ -305,7 +290,7 @@ class Puzzle
     private function getPath($nodeKey)
     {
         static $path = [];
-        $node = $this->_searched[self::FORWARD_DIRECTION][$nodeKey];
+        $node = $this->_searched[$nodeKey];
         if ($node->getParentNode() === 0) {
             return array_reverse($path);
         } else {
@@ -322,7 +307,7 @@ class Puzzle
     private function getPathEnd($nodeKey)
     {
         static $path = [];
-        $node = $this->_searched[self::REVERSE_DIRECTION][$nodeKey];
+        $node = $this->_searchedEnd[$nodeKey];
         if ($node->getParentNode() === 0) {
             return $path;
         } else {
