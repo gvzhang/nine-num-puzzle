@@ -1,2 +1,7 @@
 # nine-num-puzzle
-Speed Dial Puzzle By PHP
+应该叫八数码问题 ⊙﹏⊙‖∣°
+
+该分支使用了广度优先算法（Breadth-First-Search）解决八数码问题
+
+* 如果扩展节点较多,目标节点又处在较深层,数据量就会非常庞大
+* 所以出现了使用了DBFS算法的分支,以做对比
