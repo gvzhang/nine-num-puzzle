@@ -117,7 +117,7 @@ class Puzzle
 //            }
 //        }
 
-        $initPuzzle = [8,6,7,0,3,5,2,4,1];
+        $initPuzzle = [8, 6, 7, 0, 3, 5, 2, 4, 1];
 //        $initPuzzle = [1,2,3,4,0,5,7,8,6];
 //        $initPuzzle = [1,2,3,0,4,5,6,7,8];
         //组合成逗号字符串形式，方便存储比较
@@ -190,17 +190,18 @@ class Puzzle
             $linkQueue = null;
             $isSolve = false;
             while (!$isSolve) {
-                if (count($this->_queue[self::FORWARD_DIRECTION]) > count($this->_queue[self::REVERSE_DIRECTION])) {
-                    $firstExpand = self::REVERSE_DIRECTION;
-                    $secondExpand = self::FORWARD_DIRECTION;
+                $forwardCount = count($this->_queue[self::FORWARD_DIRECTION]);
+                $reverseCount = count($this->_queue[self::REVERSE_DIRECTION]);
+                if ($forwardCount > 0 && $reverseCount > 0) {
+                    if ($forwardCount > $reverseCount) {
+                        $expandResult = $this->expand(self::REVERSE_DIRECTION);
+                    } else {
+                        $expandResult = $this->expand(self::FORWARD_DIRECTION);
+                    }
+                    $isSolve = $expandResult["flag"];
+                    $linkQueue = $expandResult["node"];
                 } else {
-                    $firstExpand = self::FORWARD_DIRECTION;
-                    $secondExpand = self::REVERSE_DIRECTION;
-                }
-                $this->expand($firstExpand);
-                $this->expand($secondExpand);
-                if($linkQueue = $this->checkMeet()){
-                    $isSolve = true;
+                    break;
                 }
             }
             return array_merge($this->getPath($linkQueue), $this->getPathEnd($linkQueue));
@@ -212,9 +213,12 @@ class Puzzle
     /**
      * 扩展正向（逆向）结点
      * @param $direction
+     * @return boolean
      */
     private function expand($direction)
     {
+        $isSolve = false;
+        $linkQueue = null;
         $levelQueue = [];
         foreach ($this->_queue[$direction] as $queue) {
             foreach ($this->_operations as $operation) {
@@ -225,32 +229,35 @@ class Puzzle
                             $node = new Node($changeQueueKey, $queue->getKey(), $operation);
                             array_push($levelQueue, $node);
                             $this->_searched[$direction][$changeQueueKey] = $node;
+
+                            if ($isSolve = $this->checkMeet($direction, $changeQueueKey)) {
+                                $linkQueue = $changeQueueKey;
+                                break;
+                            }
                         }
                     }
                 }
             }
+            if ($isSolve) break;
         }
         $this->_queue[$direction] = $levelQueue;
+        return ["flag" => $isSolve, "node" => $linkQueue];
     }
 
     /**
      * 对比扩展节点是否存在相等的
+     * @param $direction
+     * @param $queueKey
+     * @return boolean
      */
-    private function checkMeet(){
-        $linkQueue = false;
-        $directions = [self::FORWARD_DIRECTION=>self::REVERSE_DIRECTION, self::REVERSE_DIRECTION=>self::FORWARD_DIRECTION];
-        foreach ($directions as $key=>$value) {
-            foreach ($this->_queue[$value] as $forwardNode) {
-                foreach ($this->_searched[$key] as $reverseNode) {
-                    if ($forwardNode->getKey() === $reverseNode->getKey()) {
-                        $linkQueue = $reverseNode->getKey();
-                        break;
-                    }
-                }
-                if ($linkQueue) break;
+    private function checkMeet($direction, $queueKey)
+    {
+        foreach ($this->_searched[1 - $direction] as $node) {
+            if ($node->getKey() === $queueKey) {
+                return true;
             }
         }
-        return $linkQueue;
+        return false;
     }
 
     /**
