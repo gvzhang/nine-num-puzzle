@@ -106,20 +106,17 @@ class Puzzle
      */
     public function __construct($horizontal, $vertical)
     {
-//        $initPuzzle = [];
-//        $product = $horizontal * $vertical;
-//        for ($i = 0; $i < $product; $i++) {
-//            $randNum = $this->randNumFn($product);
-//            if ($randNum == $product) {
-//                $initPuzzle[$i] = 0;
-//            } else {
-//                $initPuzzle[$i] = $randNum;
-//            }
-//        }
+        $initPuzzle = [];
+        $product = $horizontal * $vertical;
+        for ($i = 0; $i < $product; $i++) {
+            $randNum = $this->randNumFn($product);
+            if ($randNum == $product) {
+                $initPuzzle[$i] = 0;
+            } else {
+                $initPuzzle[$i] = $randNum;
+            }
+        }
 
-        $initPuzzle = [8, 6, 7, 0, 3, 5, 2, 4, 1];
-//        $initPuzzle = [1,2,3,4,0,5,7,8,6];
-//        $initPuzzle = [1,2,3,0,4,5,6,7,8];
         //组合成逗号字符串形式，方便存储比较
         foreach ($initPuzzle as $val) {
             $this->_initPuzzle .= $val . ",";
