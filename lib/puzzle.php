@@ -210,7 +210,7 @@ class Puzzle
     /**
      * 扩展正向（逆向）结点
      * @param $direction
-     * @return boolean
+     * @return array
      */
     private function expand($direction)
     {
